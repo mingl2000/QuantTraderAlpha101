@@ -9,6 +9,9 @@ from scipy.stats import rankdata
 # Refer to: https://github.com/wpwpwpwpwpwpwpwpwp/Alpha-101-GTJA-191/blob/master/101Alpha_code_1.py
 # use google docstring
 
+def ts_argmax(df, window=10):
+    return df.rolling(window).apply(np.argmax) + 1
+
 def correlation(x, y, window=10):
     """ Wrapper function correlation
 
