@@ -90,18 +90,20 @@ def prepare_data_for_alphas(tickers, data_dir, start_date='2020-01-01'):
              
     return panel
 
-def calculate_all_alphas(panel_data):
+def calculate_all_alphas(panel_data, DATASET_NAME):
     wq = WorldQuant_101_Alphas(panel_data)
     alphas = {}
     
     print("Calculating Alphas...")
     # Calculate all 101 alphas
     # for A500
-    target_alphas = ['alpha_008', 'alpha_057', 'alpha_039', 'alpha_019', 'alpha_060', 'alpha_095', 'alpha_083', 'alpha_042']
+    if DATASET_NAME =="A500":
+        target_alphas = ['alpha_008', 'alpha_057', 'alpha_039', 'alpha_019', 'alpha_060', 'alpha_095', 'alpha_083', 'alpha_042']
+        target_alphas =['alpha_060']
     #for A1000
-    #target_alphas = ['alpha_031','alpha_009','alpha_011','alpha_037','alpha_060','alpha_083','alpha_017','alpha_053','alpha_081','alpha_052']
-    target_alphas = ['alpha_031',]
-    #target_alphas = [f"alpha_{i:03d}" for i in range(1, 102)]
+    elif DATASET_NAME =="A1000":
+        target_alphas = ['alpha_031','alpha_009','alpha_011','alpha_037','alpha_060','alpha_083','alpha_017','alpha_053','alpha_081','alpha_052']
+    else:target_alphas = [f"alpha_{i:03d}" for i in range(1, 102)]
 
     for alpha_name in target_alphas:
         if hasattr(wq, alpha_name):
@@ -207,68 +209,73 @@ def run_single_backtest(saved_files, alpha_signal, alpha_name, detailed=False):
     initial_value = cerebro.broker.getvalue()
     strategies = cerebro.run()
     final_value = cerebro.broker.getvalue()
-    
+    print(type(strategies))
+    print(type(detailed))
     if detailed and strategies:
         strat = strategies[0]
         detailed_results['daily_picks'] = strat.daily_picks
         detailed_results['equity_curve'] = strat.equity_curve
     
-    ret = (final_value - initial_value) / initial_value
     
-    # 获取分析器结果
-    try:
-        sharpe_ratio = strat.analyzers.sharpe.get_analysis().get('sharperatio', 0)
-        if isinstance(sharpe_ratio, dict):
-            sharpe_ratio = sharpe_ratio.get('sharperatio', 0)
-        max_drawdown = strat.analyzers.drawdown.get_analysis().get('max', {}).get('drawdown', 0)
+    
+        # 获取分析器结果
+        try:
+            sharpe_ratio = strat.analyzers.sharpe.get_analysis().get('sharperatio', 0)
+            if isinstance(sharpe_ratio, dict):
+                sharpe_ratio = sharpe_ratio.get('sharperatio', 0)
+            max_drawdown = strat.analyzers.drawdown.get_analysis().get('max', {}).get('drawdown', 0)
+            
+            # 打印结果
+            print(f"初始资金: {initial_value:.2f}")
+            print(f"最终资金: {final_value:.2f}")
+            
+            print(f"夏普比率: {sharpe_ratio:.4f}")
+            print(f"最大回撤: {max_drawdown:.2%}")
+            
+            # 获取交易分析
+            trade_analysis = strat.analyzers.trades.get_analysis()
+            print("111")
+            # 获取胜率
+            total_trades = trade_analysis.get('total', {}).get('total', 0)
+            print("222")
+            won_trades = trade_analysis.get('won', {}).get('total', 0)
+            print("333")
+            win_rate = won_trades / total_trades if total_trades > 0 else 0
+            print("444")
+            if win_rate is not null:
+                print(f"胜率: {win_rate:.2%}")
+            # 获取平均收益
+            won_pnl = trade_analysis.get('won', {}).get('pnl', 0)   
+            print("555")
+            lost_pnl = trade_analysis.get('lost', {}).get('pnl', 0)
+
+            print("666")
+            '''
+            if won_pnl is not None and won_trades is not None:
+                avg_won = won_pnl / won_trades if won_trades > 0 else 0
+                print(f"平均盈利: {avg_won:.2f}")
+            print("777")
+            if  lost_pnl is not null and total_trades is not null and won_trades is not null:
+                avg_lost = lost_pnl / (total_trades - won_trades) if (total_trades - won_trades) > 0 else 0
+                print(f"平均亏损: {avg_lost:.2f}")
+                print(f"交易次数: {total_trades}")
+            print("888")
+            
+            
+            
+            '''
         
-        # 打印结果
-        print(f"初始资金: {initial_value:.2f}")
-        print(f"最终资金: {final_value:.2f}")
-        print(f"总收益率: {ret:.2%}")
-        print(f"夏普比率: {sharpe_ratio:.4f}")
-        print(f"最大回撤: {max_drawdown:.2%}")
-        
-        # 获取交易分析
-        trade_analysis = strat.analyzers.trades.get_analysis()
-        print("111")
-        # 获取胜率
-        total_trades = trade_analysis.get('total', {}).get('total', 0)
-        print("222")
-        won_trades = trade_analysis.get('won', {}).get('total', 0)
-        print("333")
-        win_rate = won_trades / total_trades if total_trades > 0 else 0
-        print("444")
-        
-        # 获取平均收益
-        won_pnl = trade_analysis.get('won', {}).get('pnl', 0)   
-        print("555")
-        lost_pnl = trade_analysis.get('lost', {}).get('pnl', 0)
-        print("666")
-        if won_pnl is not None and won_trades is not None:
-            avg_won = won_pnl / won_trades if won_trades > 0 else 0
-            print(f"平均盈利: {avg_won:.2f}")
-        print("777")
-        if  lost_pnl is not null and total_trades is not null and won_trades is not null:
-            avg_lost = lost_pnl / (total_trades - won_trades) if (total_trades - won_trades) > 0 else 0
-            print(f"平均亏损: {avg_lost:.2f}")
-            print(f"交易次数: {total_trades}")
-        print("888")
-        
-        
-        print(f"胜率: {win_rate:.2%}")
-        
-       
-        
-        # 绘制结果
-        if plot:
+            
+            # 绘制结果
             print("999")
             cerebro.plot(style='candle', figsize=figsize)
+            plt.show()
             print("aaa")
-    except Exception as e:
-        print(f"Error in backtesting: {alpha_name} {e}") 
-    
-
+        except Exception as e:
+            print(f"Error in backtesting: {alpha_name} {e}") 
+        
+    ret = (final_value - initial_value) / initial_value
+    print(f"总收益率: {ret:.2%}")
     return ret
 
 def main():
@@ -305,7 +312,7 @@ def main():
     panel_data = prepare_data_for_alphas(tickers, DATA_DIR)
     
     # Calculate Alphas
-    all_alphas = calculate_all_alphas(panel_data)
+    all_alphas = calculate_all_alphas(panel_data, DATASET_NAME)
     print(f"Computed {len(all_alphas)} valid alpha signals.")
     
     # --- Index Regime Filter ---
