@@ -52,7 +52,6 @@ def prepare_data_for_alphas(tickers, data_dir, start_date='2020-01-01'):
             
             # Standardize columns to lowercase
             df.columns = [c.lower() for c in df.columns]
-            
             # Fix zero volume
             if 'volume' in df.columns:
                 df['volume'] = df['volume'].replace(0, np.nan).fillna(method='ffill')
@@ -234,7 +233,7 @@ def run_single_backtest(saved_files, alpha_signal, alpha_name, detailed=False):
             
             # 获取交易分析
             trade_analysis = strat.analyzers.trades.get_analysis()
-            print("111")
+            print("111 trade_analysis:", type(trade_analysis))
             # 获取胜率
             total_trades = trade_analysis.get('total', {}).get('total', 0)
             print("222")
@@ -272,7 +271,7 @@ def run_single_backtest(saved_files, alpha_signal, alpha_name, detailed=False):
             plt.show()
             print("aaa")
         except Exception as e:
-            print(f"Error in backtesting: {alpha_name} {e}") 
+            print(f"Error in backtesting: {alpha_name}") 
         
     ret = (final_value - initial_value) / initial_value
     print(f"总收益率: {ret:.2%}")
@@ -324,10 +323,15 @@ def main():
         print(f"Loading Index Data from {INDEX_FILE}...")
         try:
             df_index = pd.read_csv(INDEX_FILE, index_col=0, parse_dates=True)
-            index_close = df_index['Close']
-            index_ma = index_close.rolling(60).mean()
-            regime = (index_close > index_ma).astype(int)
-            
+            print(df_index.head())
+            index_close = df_index['Amount']
+
+            index_ma60 = index_close.rolling(60).mean()
+            index_ma20 = index_close.rolling(20).mean()
+            #regime = ((index_close > index_ma60) & (index_ma60>index_ma60.shift(1))& (index_ma60>index_ma20)).astype(int)
+            #regime = ((index_close > index_ma60) & (index_ma20>index_ma60)).astype(int)
+            regime = ((index_close > index_ma60)).astype(int)
+            #regime = True
             print("Applying Regime Filter (Close > MA60)...")
             filtered_alphas = {}
             for name, signal in all_alphas.items():
