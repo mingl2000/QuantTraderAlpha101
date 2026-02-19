@@ -97,10 +97,10 @@ def calculate_all_alphas(panel_data):
     print("Calculating Alphas...")
     # Calculate all 101 alphas
     # for A500
-    #target_alphas = ['alpha_008', 'alpha_057', 'alpha_039', 'alpha_019', 'alpha_060', 'alpha_095', 'alpha_083', 'alpha_042']
+    target_alphas = ['alpha_008', 'alpha_057', 'alpha_039', 'alpha_019', 'alpha_060', 'alpha_095', 'alpha_083', 'alpha_042']
     #for A1000
-    target_alphas = ['alpha_031','alpha_009','alpha_011','alpha_037','alpha_060','alpha_083','alpha_017','alpha_053','alpha_081','alpha_052']
-
+    #target_alphas = ['alpha_031','alpha_009','alpha_011','alpha_037','alpha_060','alpha_083','alpha_017','alpha_053','alpha_081','alpha_052']
+    target_alphas = ['alpha_031',]
     #target_alphas = [f"alpha_{i:03d}" for i in range(1, 102)]
 
     for alpha_name in target_alphas:
@@ -214,6 +214,61 @@ def run_single_backtest(saved_files, alpha_signal, alpha_name, detailed=False):
         detailed_results['equity_curve'] = strat.equity_curve
     
     ret = (final_value - initial_value) / initial_value
+    
+    # 获取分析器结果
+    try:
+        sharpe_ratio = strat.analyzers.sharpe.get_analysis().get('sharperatio', 0)
+        if isinstance(sharpe_ratio, dict):
+            sharpe_ratio = sharpe_ratio.get('sharperatio', 0)
+        max_drawdown = strat.analyzers.drawdown.get_analysis().get('max', {}).get('drawdown', 0)
+        
+        # 打印结果
+        print(f"初始资金: {initial_value:.2f}")
+        print(f"最终资金: {final_value:.2f}")
+        print(f"总收益率: {ret:.2%}")
+        print(f"夏普比率: {sharpe_ratio:.4f}")
+        print(f"最大回撤: {max_drawdown:.2%}")
+        
+        # 获取交易分析
+        trade_analysis = strat.analyzers.trades.get_analysis()
+        print("111")
+        # 获取胜率
+        total_trades = trade_analysis.get('total', {}).get('total', 0)
+        print("222")
+        won_trades = trade_analysis.get('won', {}).get('total', 0)
+        print("333")
+        win_rate = won_trades / total_trades if total_trades > 0 else 0
+        print("444")
+        
+        # 获取平均收益
+        won_pnl = trade_analysis.get('won', {}).get('pnl', 0)   
+        print("555")
+        lost_pnl = trade_analysis.get('lost', {}).get('pnl', 0)
+        print("666")
+        if won_pnl is not None and won_trades is not None:
+            avg_won = won_pnl / won_trades if won_trades > 0 else 0
+            print(f"平均盈利: {avg_won:.2f}")
+        print("777")
+        if  lost_pnl is not null and total_trades is not null and won_trades is not null:
+            avg_lost = lost_pnl / (total_trades - won_trades) if (total_trades - won_trades) > 0 else 0
+            print(f"平均亏损: {avg_lost:.2f}")
+            print(f"交易次数: {total_trades}")
+        print("888")
+        
+        
+        print(f"胜率: {win_rate:.2%}")
+        
+       
+        
+        # 绘制结果
+        if plot:
+            print("999")
+            cerebro.plot(style='candle', figsize=figsize)
+            print("aaa")
+    except Exception as e:
+        print(f"Error in backtesting: {alpha_name} {e}") 
+    
+
     return ret
 
 def main():
@@ -299,6 +354,7 @@ def main():
     print("\nDone.")
     
     df_results = pd.DataFrame(results)
+    print(df_results.columns)
     df_results = df_results.sort_values(by='Return', ascending=False)
     
     output_csv = f'WQ101_Backtest_Results_{DATASET_NAME}.csv'
