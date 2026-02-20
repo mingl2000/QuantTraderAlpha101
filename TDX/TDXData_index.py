@@ -17,7 +17,10 @@ def main(dataset):
         "A500":"000510cons.xls",
         "A1000":"000852cons.xls",
         "HS300":"000300cons.xls",
-        "HS500":"000905cons.xls"
+        "HS500":"000905cons.xls",
+        "AAll":"930903cons.xls",
+        "KCCY50":"931643cons.xls",
+        "KC50":"000688cons.xls",
     }
     # 1. Load Excel File
     excel_path = '/Volumes/IUSB/vipdoc/'+map[dataset]

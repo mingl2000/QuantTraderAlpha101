@@ -97,11 +97,25 @@ def calculate_all_alphas(panel_data, DATASET_NAME):
     # Calculate all 101 alphas
     # for A500
     if DATASET_NAME =="A500":
-        target_alphas = ['alpha_008', 'alpha_057', 'alpha_039', 'alpha_019', 'alpha_060', 'alpha_095', 'alpha_083', 'alpha_042']
-        target_alphas =['alpha_060']
+        target_alphas = ['alpha_060','alpha_008', 'alpha_057', 'alpha_039', 'alpha_019', 'alpha_095', 'alpha_083', 'alpha_042']
+        #target_alphas =['alpha_060']
+        target_alphas =['alpha_102']
     #for A1000
     elif DATASET_NAME =="A1000":
         target_alphas = ['alpha_031','alpha_009','alpha_011','alpha_037','alpha_060','alpha_083','alpha_017','alpha_053','alpha_081','alpha_052']
+        target_alphas =['alpha_102']
+    #for HS300
+    elif DATASET_NAME =="HS300":
+        target_alphas = ['alpha_083','alpha_060','alpha_008','alpha_033','alpha_052','alpha_028','alpha_025','alpha_019','alpha_005','alpha_095']
+    elif DATASET_NAME =="AAll":
+        target_alphas = ['alpha_083','alpha_060','alpha_008','alpha_033','alpha_052','alpha_028','alpha_025','alpha_019','alpha_005','alpha_095','alpha_060','alpha_008', 'alpha_057', 'alpha_039', 'alpha_019', 'alpha_095', 'alpha_083', 'alpha_042','alpha_031','alpha_009','alpha_011','alpha_037','alpha_060','alpha_083','alpha_017','alpha_053','alpha_081','alpha_052']
+        target_alphas =list(set(target_alphas))
+        target_alphas=['alpha_052','alpha_095','alpha_011','alpha_081','alpha_009','alpha_028','alpha_031','alpha_042','alpha_060','alpha_025']
+        target_alphas =['alpha_102']
+    elif DATASET_NAME =="KCCY50":
+        target_alphas = ['alpha_026','alpha_024','alpha_040','alpha_083','alpha_099','alpha_005','alpha_075','alpha_032','alpha_004','alpha_077']
+    elif DATASET_NAME =="KC50":
+        target_alphas = ['alpha_083','alpha_060','alpha_008','alpha_033','alpha_052','alpha_028','alpha_025','alpha_019','alpha_005','alpha_095']
     else:target_alphas = [f"alpha_{i:03d}" for i in range(1, 102)]
 
     for alpha_name in target_alphas:
