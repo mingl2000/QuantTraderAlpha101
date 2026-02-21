@@ -158,9 +158,12 @@ class WQAlphaStrategy(bt.Strategy):
         valid_signals = daily_signal[valid_tickers].dropna()
         if valid_signals.empty: return
         
-        sorted_signals = valid_signals.sort_values(ascending=False)
-        target_n = self.params.top_n
-        longs = sorted_signals.head(target_n).index.tolist()
+        if (valid_signals == 0).all():
+            longs = []
+        else:
+            sorted_signals = valid_signals.sort_values(ascending=False)
+            target_n = self.params.top_n
+            longs = sorted_signals.head(target_n).index.tolist()
         
         if self.params.save_picks:
             try:
