@@ -98,7 +98,7 @@ def calculate_all_alphas(panel_data, DATASET_NAME):
     # for A500
     if DATASET_NAME =="A500":
         #alpha_102 (2/12) 172.83% # 4 days max top 10
-        target_alphas = ['alpha_102','alpha_103','alpha_104','alpha_060','alpha_008', 'alpha_057', 'alpha_039', 'alpha_019', 'alpha_095', 'alpha_083', 'alpha_042']
+        target_alphas = ['alpha_102','alpha_103','alpha_104','alpha_105','alpha_060','alpha_008', 'alpha_057', 'alpha_039', 'alpha_019', 'alpha_095', 'alpha_083', 'alpha_042']
         #target_alphas =['alpha_060']
         #target_alphas =['alpha_102']
     #for A1000
@@ -194,7 +194,7 @@ def run_single_backtest(saved_files, alpha_signal, alpha_name, detailed=False):
         alpha_signal.index = alpha_signal.index.tz_localize(None)
     
     cerebro = bt.Cerebro(stdstats=False)
-    cerebro.addstrategy(WQAlphaStrategy, signal=alpha_signal, top_n=5, save_picks=detailed)
+    cerebro.addstrategy(WQAlphaStrategy, signal=alpha_signal, top_n=10, save_picks=detailed)
     
     data_added = False
     valid_tickers = [t for t in alpha_signal.columns]
@@ -249,7 +249,7 @@ def run_single_backtest(saved_files, alpha_signal, alpha_name, detailed=False):
             print(f"夏普比率: {sharpe_ratio:.4f}")
             print(f"最大回撤: {max_drawdown:.2%}")
             
-            # 获取交易分析
+            # 获取交ç易分析
             trade_analysis = strat.analyzers.trades.get_analysis()
             print("111 trade_analysis:", type(trade_analysis))
             # 获取胜率

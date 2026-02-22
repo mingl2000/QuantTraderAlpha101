@@ -737,9 +737,13 @@ class WorldQuant_101_Alphas(object):
     def alpha_104(self):
         out = delta(self.close, 6) / delay(self.close, 6).replace(0, np.nan)
         return _clean(out)
+    # Alpha#105
     def alpha_105(self):
         out = delta(self.close, 4) / delay(self.close, 4).replace(0, np.nan)
-        return _clean(out)
+        out = _clean(out)
+        # Filter out stocks where tomorrow's open is lower than today's close
+        cond = delay(self.open, -1) < self.close
+        return out.mask(cond, np.nan)
 
     # ---------------------------------------------------------------------
     # IMPORTANT:
