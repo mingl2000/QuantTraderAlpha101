@@ -724,6 +724,23 @@ class WorldQuant_101_Alphas(object):
         out = (self.close - self.open) / ((self.high - self.low) + 0.001)
         return _clean(out)
 
+    # Alpha#102
+    def alpha_102(self):
+        out = delta(self.close, 4) / delay(self.close, 4).replace(0, np.nan)
+        return _clean(out)
+    # Alpha#103
+    def alpha_103(self):
+        out = delta(self.close, 5) / delay(self.close, 5).replace(0, np.nan)
+
+        return _clean(out)
+    # Alpha#104
+    def alpha_104(self):
+        out = delta(self.close, 6) / delay(self.close, 6).replace(0, np.nan)
+        return _clean(out)
+    def alpha_105(self):
+        out = delta(self.close, 4) / delay(self.close, 4).replace(0, np.nan)
+        return _clean(out)
+
     # ---------------------------------------------------------------------
     # IMPORTANT:
     # You did not include alpha_056, 058-059, 063, 067, 069-070, 076, 079-080,

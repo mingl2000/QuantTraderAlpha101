@@ -97,13 +97,14 @@ def calculate_all_alphas(panel_data, DATASET_NAME):
     # Calculate all 101 alphas
     # for A500
     if DATASET_NAME =="A500":
-        target_alphas = ['alpha_060','alpha_008', 'alpha_057', 'alpha_039', 'alpha_019', 'alpha_095', 'alpha_083', 'alpha_042']
+        #alpha_102 (2/12) 172.83% # 4 days max top 10
+        target_alphas = ['alpha_102','alpha_103','alpha_104','alpha_060','alpha_008', 'alpha_057', 'alpha_039', 'alpha_019', 'alpha_095', 'alpha_083', 'alpha_042']
         #target_alphas =['alpha_060']
-        target_alphas =['alpha_102']
+        #target_alphas =['alpha_102']
     #for A1000
     elif DATASET_NAME =="A1000":
         target_alphas = ['alpha_031','alpha_009','alpha_011','alpha_037','alpha_060','alpha_083','alpha_017','alpha_053','alpha_081','alpha_052']
-        target_alphas =['alpha_102']
+        #target_alphas =['alpha_102']
     #for HS300
     elif DATASET_NAME =="HS300":
         target_alphas = ['alpha_083','alpha_060','alpha_008','alpha_033','alpha_052','alpha_028','alpha_025','alpha_019','alpha_005','alpha_095']
@@ -111,7 +112,7 @@ def calculate_all_alphas(panel_data, DATASET_NAME):
         target_alphas = ['alpha_083','alpha_060','alpha_008','alpha_033','alpha_052','alpha_028','alpha_025','alpha_019','alpha_005','alpha_095','alpha_060','alpha_008', 'alpha_057', 'alpha_039', 'alpha_019', 'alpha_095', 'alpha_083', 'alpha_042','alpha_031','alpha_009','alpha_011','alpha_037','alpha_060','alpha_083','alpha_017','alpha_053','alpha_081','alpha_052']
         target_alphas =list(set(target_alphas))
         target_alphas=['alpha_052','alpha_095','alpha_011','alpha_081','alpha_009','alpha_028','alpha_031','alpha_042','alpha_060','alpha_025']
-        target_alphas =['alpha_102']
+        #target_alphas =['alpha_102']
     elif DATASET_NAME =="KCCY50":
         target_alphas = ['alpha_026','alpha_024','alpha_040','alpha_083','alpha_099','alpha_005','alpha_075','alpha_032','alpha_004','alpha_077']
     elif DATASET_NAME =="KC50":
@@ -193,7 +194,7 @@ def run_single_backtest(saved_files, alpha_signal, alpha_name, detailed=False):
         alpha_signal.index = alpha_signal.index.tz_localize(None)
     
     cerebro = bt.Cerebro(stdstats=False)
-    cerebro.addstrategy(WQAlphaStrategy, signal=alpha_signal, top_n=10, save_picks=detailed)
+    cerebro.addstrategy(WQAlphaStrategy, signal=alpha_signal, top_n=5, save_picks=detailed)
     
     data_added = False
     valid_tickers = [t for t in alpha_signal.columns]
@@ -341,13 +342,27 @@ def main():
         try:
             df_index = pd.read_csv(INDEX_FILE, index_col=0, parse_dates=True)
             print(df_index.head())
-            index_close = df_index['Amount']
+            index_amount = df_index['Amount'] #bese for A500 1.31%
+            index_close = df_index['Close']
+            index_volume = df_index['Volume']
+            #index_close = df_index['Vwap']
+            
+            # Calculate OBV
+            obv = (np.sign(index_close.diff()) * index_volume).fillna(0).cumsum()
+            
+            #index_ma60 = index_close.ewm(span=60, adjust=False).mean() #113.9%
+            #index_ma20 = index_close.ewm(span=20, adjust=False).mean()
+            index_ma60 = index_amount.rolling(60).mean()#131.62%
+            index_ma10 = index_amount.rolling(10).mean()
+            index_ma5 = index_amount.rolling(5).mean() #alpha_060 141.1%
+            index_ma2 = index_amount.rolling(2).mean() #alpha_060 141.1%
 
-            index_ma60 = index_close.rolling(60).mean()
-            index_ma20 = index_close.rolling(20).mean()
+
             #regime = ((index_close > index_ma60) & (index_ma60>index_ma60.shift(1))& (index_ma60>index_ma20)).astype(int)
             #regime = ((index_close > index_ma60) & (index_ma20>index_ma60)).astype(int)
-            regime = ((index_close > index_ma60)).astype(int)
+            #regime = ((index_ma10 > index_ma60)).astype(int) #alpha_083 1.371106
+            regime = ((index_ma2> index_ma60)).astype(int) #alpha_060 141.1%
+            
             #regime = True
             print("Applying Regime Filter (Close > MA60)...")
             filtered_alphas = {}
